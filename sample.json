@@ -1,0 +1,31 @@
+{
+  "info": {
+    "course": "VE281",
+    "name": "Data Structures and Algorithms",
+    "semester": "FA2018",
+    "instructor": "Weikang Qian"
+  },
+  "reporter": {
+    "name": "Yihao Liu",
+    "identity": "TA",
+    "email": "liuyh615@sjtu.edu.cn",
+    "phone": "18964688141"
+  },
+  "cases": [
+    {
+      "moss": "http://moss.stanford.edu/results/705276733",
+      "name": "Project 3",
+      "matches": [
+        {
+          "students": [
+            516021910219,
+            516370910236,
+            516370910123,
+            516370910102,
+            516021910199
+          ]
+        }
+      ]
+    }
+  ]
+}
