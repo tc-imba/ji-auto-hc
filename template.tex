@@ -1,0 +1,78 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{enumerate}
+\usepackage{setspace}
+\usepackage[left=1.5cm,right=1.5cm,top=1cm,bottom=2cm]{geometry}
+\usepackage{longtable}
+\usepackage{array}
+\renewcommand{\arraystretch}{2}
+\usepackage[colorlinks=true,breaklinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue]{hyperref}
+\usepackage{ctex}
+\CTEXoptions[today=old]
+
+\usepackage{fontspec}
+%\renewcommand{\familydefault}{\sfdefault}
+\setsansfont{cmunb}[        %CMU Bright for text
+Extension=.otf,
+UprightFont=*mr,
+ItalicFont=*mo,
+BoldFont=*bx, % semibold
+BoldItalicFont=*so, % semibold oblique
+NFSSFamily=cmbr
+]
+\setmainfont{CMU Bright}
+\usepackage{cmbright}
+
+\title{Report Form for Suspected Honor Code Violations}
+\date{}
+
+\begin{document}
+
+{#\maketitle#}
+
+\begin{center}
+\huge\centering
+Report Form for Suspected \\[-0.2cm]
+Honor Code Violations
+\end{center}
+
+{#\begin{center}#}
+\begin{longtable}{|m{5cm}|m{12cm}|}
+\hline
+Course Code and Name: & {{ info['course'] }}, {{ info['name'] }} \\\hline
+Instructor: & {{ info['instructor'] }} \\\hline
+Names and / or student IDs of the involved students: &
+{% for student in students %}
+    {{ student['id'] }} ({{ student['name'] }})
+{% endfor %}\\\hline
+\multicolumn{2}{|m{17cm}|}{
+Circumstances of the suspected violation: \smallskip
+
+According to the MOSS (Measure Of Software Similarity) detection of
+\textbf{ {{ case['name'] }} } in \textbf{ {{ info['course'] }} {{ info['semester'] }} },
+the student(s) listed were suspected \textbf{source code plagiarism}
+which violates the Honor Code. \smallskip
+
+Online Source: {% if not source %}None{% else %}\url{ {{ source }} }{% endif %} \smallskip
+
+Reporter: {{ reporter['name'] }} ({{ reporter['identity'] }}),
+email: \href{mailto:{{ reporter['email'] }} }{ {{ reporter['email'] }} },
+phone:\texttt{ {{ reporter['phone'] }} }
+}\\\hline
+\multicolumn{2}{|m{14cm}|}{
+Attached Documents: \smallskip
+{% for match in matches %}
+    {{ loop.index }}. \href{./matches/match{{ match.match_id }}.html}
+    { {{ match.left_id }} ({{ match.left_percentage }}\%) / {{ match.right_id }} ({{ match.right_percentage }}\%) }
+    (match{{ match.match_id }})
+{% endfor %}}\\\hline
+\multicolumn{2}{|m{14cm}|}{
+Signature and Date: \smallskip
+
+{{ reporter['name'] }}, \today
+}\\\hline
+\end{longtable}
+{#\end{center}#}
+
+
+\end{document}

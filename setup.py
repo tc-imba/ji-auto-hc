@@ -14,5 +14,6 @@ setup(
         'jinja2',
         'beautifulsoup4',
         'lxml',
+        'aiohttp',
     ],
 )
