@@ -93,7 +93,7 @@ def generate_download_match_tasks(session, output_dir, match_id, match_url, verb
     return tasks
 
 
-async def generate_hc_letter(session, matches, output_dir, verbose):
+async def generate_hc_letter(session, matches, output_match, output_dir, verbose, debug):
     tasks = []
 
     for row in matches:
@@ -107,6 +107,15 @@ async def generate_hc_letter(session, matches, output_dir, verbose):
     if verbose:
         print('Compiling:', command, '(pid = ' + str(process.pid) + ')')
     stdout, stderr = await process.communicate()
+    if not debug:
+        for root, dirs, files in os.walk(output_dir):
+            for file in files:
+                if not file.endswith(('.html', '.pdf')):
+                    os.remove(os.path.join(root, file))
+            for file in dirs:
+                if not os.listdir(os.path.join(root, file)):
+                    os.rmdir(os.path.join(root, file))
+    print('Finished:', output_match)
 
 
 def get_version():
@@ -120,9 +129,10 @@ def get_version():
 @click.option('-s', '--students', required=True, type=click.File(), help='CSV file with student names and ids')
 @click.option('-v', '--verbose', is_flag=True, help='Display verbose information')
 @click.option('--serial', is_flag=True, help='Process data in serial [default: in parallel]')
+@click.option('--debug', is_flag=True, help='Use debug mode')
 @click.version_option(version=get_version())
 @coroutine
-async def main(input, output, template, students, verbose, serial):
+async def main(input, output, template, students, verbose, serial, debug):
     """A tool automatically sending someone to the honor council."""
     output = os.path.abspath(output)
     if not os.path.exists(output):
@@ -149,12 +159,12 @@ async def main(input, output, template, students, verbose, serial):
             for i, match in enumerate(case['matches']):
                 output_match = '%s-%s-%s-%d' % (
                     config['info']['course'], config['info']['semester'], case['shortname'], i)
-                print('Started: %s' % output_match)
-                output_match = os.path.join(output, output_match.lower())
-                if os.path.exists(output_match):
-                    shutil.rmtree(output_match)
-                shutil.copytree(template_dir, output_match)
-                os.mkdir(os.path.join(output_match, 'matches'))
+                print('Started:', output_match)
+                output_match_abs = os.path.join(output, output_match.lower())
+                if os.path.exists(output_match_abs):
+                    shutil.rmtree(output_match_abs)
+                shutil.copytree(template_dir, output_match_abs)
+                os.mkdir(os.path.join(output_match_abs, 'matches'))
 
                 matches = list()
                 for a, b in itertools.combinations(match['students'], 2):
@@ -174,7 +184,7 @@ async def main(input, output, template, students, verbose, serial):
                         'id': student
                     })
 
-                with open(os.path.join(output_match, 'letter.tex'), 'w') as file:
+                with open(os.path.join(output_match_abs, 'letter.tex'), 'w') as file:
                     file.write(template.render(
                         info=config['info'],
                         reporter=config['reporter'],
@@ -185,7 +195,7 @@ async def main(input, output, template, students, verbose, serial):
                         version=get_version(),
                     ))
 
-                hc_task = generate_hc_letter(session, matches, output_match, verbose)
+                hc_task = generate_hc_letter(session, matches, output_match, output_match_abs, verbose, debug)
                 if serial:
                     await hc_task
                 else:
