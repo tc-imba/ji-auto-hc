@@ -122,7 +122,7 @@ def get_version():
 @click.option('--serial', is_flag=True, help='Process data in serial [default: in parallel]')
 @click.version_option(version=get_version())
 @coroutine
-async def main(input, output, template, students, verbose):
+async def main(input, output, template, students, verbose, serial):
     """A tool automatically sending someone to the honor council."""
     output = os.path.abspath(output)
     if not os.path.exists(output):
@@ -185,7 +185,11 @@ async def main(input, output, template, students, verbose):
                         version=get_version(),
                     ))
 
-                hc_tasks.append(asyncio.ensure_future(generate_hc_letter(session, matches, output_match, verbose)))
+                hc_task = generate_hc_letter(session, matches, output_match, verbose)
+                if serial:
+                    await hc_task
+                else:
+                    hc_tasks.append(asyncio.ensure_future(hc_task))
 
         await asyncio.gather(*hc_tasks)
 
